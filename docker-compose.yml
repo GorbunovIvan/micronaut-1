@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+
+  #  Postgres
+  postgres-db:
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: micronaut-1
+    healthcheck:
+      # We need to pass the user and database argument (user follows "-U" param and db follows "-d" param):
+      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "micronaut-1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  #  App
+  micronaut-1:
+    depends_on:
+      - postgres-db
+    image: ivangorbunovv/micronaut-1-image
+    ports:
+      - "8080:8080"
+    environment:
+      - DATASOURCES_DEFAULT_URL=jdbc:postgresql://postgres-db:5432/micronaut-1
